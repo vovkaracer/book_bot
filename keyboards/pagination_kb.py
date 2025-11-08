@@ -13,5 +13,4 @@ def create_pagination_keyboard(*buttons: str) -> InlineKeyboardMarkup:
             for button in buttons
         ]
     )
-
     return kb_builder.as_markup()

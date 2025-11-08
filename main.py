@@ -30,7 +30,7 @@ async def main():
     dp = Dispatcher()
 
     logger.info('Preparing book')
-    book = prepare_book()
+    book = prepare_book('/book/book.txt')
     logger.info('The book is uploaded. Total pages: %d', len(book))
 
     db: dict = init_db()

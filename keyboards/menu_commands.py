@@ -11,5 +11,5 @@ async def set_main_menu(bot: Bot):
 
     await bot.set_my_commands(
         commands=main_menu_commands,
-        scope=BotCommandScopeAllPrivateChats
+        scope=BotCommandScopeAllPrivateChats()
     )

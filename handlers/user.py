@@ -16,21 +16,23 @@ async def process_start_command(message: Message, db:dict):
     if message.from_user.id not in db['users']:
         db['users'][message.from_user.id] = deepcopy(db.get('user_template'))
 
-@user_router.message(Command(commands='/help'))
+@user_router.message(Command(commands='help'))
 async def process_help_command(message: Message):
     await message.answer(text=LEXICON[message.text])
 
-@user_router.message(Command(commands='/beginning'))
+@user_router.message(Command(commands='beginning'))
 async def process_beginning_command(message: Message, db: dict, book: dict):
     db['users'][message.from_user.id]['page'] = 1
     await message.answer(
         text=book[1],
         reply_markup=create_pagination_keyboard(
-            ('backward', f'1/{len(book)}', 'forward')
+            'backward',
+            f'1/{len(book)}',
+            'forward'
         )
     )
 
-@user_router.message(Command(commands='/continue'))
+@user_router.message(Command(commands='continue'))
 async def process_continue_command(message: Message, db: dict, book: dict):
     user_page = db['users'][message.from_user.id]['page']
     await message.answer(
@@ -42,7 +44,7 @@ async def process_continue_command(message: Message, db: dict, book: dict):
         )
     )
 
-@user_router.message(Command(commands='/bookmarks'))
+@user_router.message(Command(commands='bookmarks'))
 async def process_bookmarks_command(message: Message, db: dict, book: dict):
     user_bookmarks = db['users'][message.from_user.id]['bookmarks']
     if user_bookmarks:
@@ -53,31 +55,31 @@ async def process_bookmarks_command(message: Message, db: dict, book: dict):
     else:
         await message.answer(text=LEXICON['no_bookmarks'])
 
-@user_router.callback_query(Command(F.data =='forward'))
+@user_router.callback_query(F.data == 'forward')
 async def process_forward_command(callback: CallbackQuery, db: dict, book: dict):
     user_page = db['users'][callback.from_user.id]['page']
     if user_page < len(book):
         db['users'][callback.from_user.id]['page'] += 1
         await callback.message.edit_text(
-            text=book[user_page],
+            text=book[user_page + 1],
             reply_markup=create_pagination_keyboard(
                 'backward',
-                f'{user_page}/{len(book)}',
+                f'{user_page + 1}/{len(book)}',
                 'forward'
             )
         )
     await callback.answer()
 
-@user_router.callback_query(Command(F.data == 'backward'))
+@user_router.callback_query(F.data == 'backward')
 async def process_bacward_command(callback: CallbackQuery, db: dict, book: dict):
     user_page = db['users'][callback.from_user.id]['page']
     if user_page != 1:
         db['users'][callback.from_user.id]['page'] -= 1
         await callback.message.edit_text(
-            text=book[user_page],
+            text=book[user_page - 1],
             reply_markup=create_pagination_keyboard(
                 'backward',
-                f'{user_page}/{len(book)}',
+                f'{user_page - 1}/{len(book)}',
                 'forward'
             )
         )
@@ -119,7 +121,7 @@ async def process_cancel_press(callback: CallbackQuery):
         text=LEXICON['cancel_text']
     )
 
-@user_router.callback_query(IsDelBookmarkCallbackData)
+@user_router.callback_query(IsDelBookmarkCallbackData())
 async def process_del_bookmark_press(callback: CallbackQuery, db: dict, book: dict):
     db['users'][callback.from_user.id]['bookmarks'].remove(int(callback.data[:-3]))
     user_bookmarks = db['users'][callback.from_user.id]['bookmarks']
